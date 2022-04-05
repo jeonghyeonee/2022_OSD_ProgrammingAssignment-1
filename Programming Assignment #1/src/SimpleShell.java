@@ -9,6 +9,7 @@ public class SimpleShell {
         ProcessBuilder pb = new ProcessBuilder();
         File startDir = new File(System.getProperty("user.dir"));
         pb.directory(startDir);
+        String beforeCmd;
 
         ArrayList<List<String>> history = new ArrayList<>();
 
@@ -21,10 +22,19 @@ public class SimpleShell {
             // making Arraylist
             List<String> commandArr = Arrays.asList(commandLine.split(" "));
 
-//            System.out.println(commandArr.getClass().getName());
+            if(!commandLine.contains("!")){
+                if(history.size() == 0){
+                    history.add(commandArr);
+                }
+                else{
+                    beforeCmd = String.join(" ", history.get(history.size()-1));
 
-            // commandArr append in history array
-            history.add(commandArr);
+                    if(!commandLine.equals(beforeCmd))
+                        history.add(commandArr);
+                }
+
+            }
+
 
             // if the user entered a return, just loop again
             if (commandLine.equals(""))
@@ -36,59 +46,65 @@ public class SimpleShell {
                 System.exit(0);
             }
 
+            if (commandLine.matches("!!")){
+                if(history.size() == 0){
+                    System.out.println(commandLine + ": event not found");
+                    continue;
+                }
+                else{
+                    String lastCmd = String.join(" ", history.get(history.size()-1));
+
+                    commandArr = Arrays.asList(lastCmd.split(" "));
+                    commandLine = lastCmd;
+
+                    beforeCmd = String.join(" ", history.get(history.size()-2));
+
+                    if(!commandLine.equals(beforeCmd))
+                        history.add(commandArr);
+
+                }
+            }
+
+            //              !# command
+            //                if enter !<#> -> history recorded the # of history command
+            else if(String.valueOf(commandLine.charAt(0)).matches("!")){
+                int idx = Character.getNumericValue(commandLine.charAt(1));
+                if(idx < history.size()){
+                    String idxCmd = String.join(" ", history.get(idx));
+
+                    commandArr = Arrays.asList(idxCmd.split(" "));
+                    commandLine = idxCmd;
+
+                    beforeCmd = String.join(" ", history.get(history.size()-1));
+
+                    if(!commandLine.equals(beforeCmd))
+                        history.add(commandArr);
+
+                }
+                else{
+                    System.out.println(commandLine+": event not found");
+                    continue;
+                }
+            }
+
             try {
-
-//                !! command
-                if (commandLine.matches("!!")){
-                    if(history.size() == 0){
-                        System.out.println("event not found");
-                        continue;
-                    }
-                    else{
-                        String lastCmd = null;
-                        for (String str : history.get(history.size()-2)){
-                            lastCmd = str + " ";
-                        }
-
-                        commandArr = Arrays.asList(lastCmd.split(" "));
-                        commandLine = lastCmd;
-                        history.add(commandArr);
+    //                !! command
 
 
-                    }
-                }
 
-                if(String.valueOf(commandLine.charAt(0)).matches("!")){
-                    int idx = Character.getNumericValue(commandLine.charAt(1));
-                    if(idx <= history.size()){
-                        String idxCmd = null;
-                        for (String str : history.get(idx)){
-                            idxCmd = str + " ";
-                        }
-
-                        commandArr = Arrays.asList(idxCmd.split(" "));
-                        commandLine = idxCmd;
-                        history.add(commandArr);
-                    }
-                }
-
-
-//              history command
+    //              history command
                 if(commandLine.matches("history")){
+
                     for (int i = 0; i<history.size(); i++){
-                        System.out.print(i+" ");
-                        for (int j = 0; j<history.get(i).size(); j++){
-                            System.out.print(history.get(i).get(j)+" ");
-                        }
-                        System.out.println();
+                        System.out.println(i+" "+String.join(" ", history.get(i)));
                     }
                     continue;
                 }
 
 
 
-//                cd command
-                if (commandLine.contains("cd")){
+    //                cd command
+                else if (commandLine.contains("cd")){
                     if (commandLine.matches("cd") == true){
                         File home = new File(System.getProperty("user.home"));
                         System.out.println(home);
@@ -120,38 +136,33 @@ public class SimpleShell {
                     }
                 }
 
+
+                pb.command(commandArr);
+
+                Process process = pb.start();
+
+                // obtain the input stream
+                InputStream is = process.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+
+                // read the output of the process
+                String line;
+                while ((line = br.readLine()) != null)
+                    System.out.println(line);
+
+                br.close();
+
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(commandLine+ ": not found");
+                continue;
             }
 
 
 //            OSProcess Add
-
-            pb.command(commandArr);
-
-            Process process = pb.start();
-
-            // obtain the input stream
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-
-            // read the output of the process
-            String line;
-            while ((line = br.readLine()) != null)
-                System.out.println(line);
-
-            br.close();
+//            can run 'pwd, ls, ps, cat'
 
 
-
-            // args[0] is the command that is run in a separate process
-
-
-
-//            for(String line : ProcessorBuilder){
-//                System.out.println(line);
-//            }
 
             /** The steps are:
              * (1) parse the input to obtain the command and any parameters
