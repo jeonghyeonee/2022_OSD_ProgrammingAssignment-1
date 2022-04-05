@@ -101,65 +101,93 @@ public class SimpleShell {
 
 
 //                cd command
-                else if (commandLine.contains("cd")){
-                    String dir = commandArr.get(1);
 
-
-                    if (commandLine.matches("cd") | dir.equals("~")){
+                if (commandLine.contains("cd")){
+                    if (commandLine.matches("cd") | commandLine.matches("cd ~")){
                         File home = new File(System.getProperty("user.home"));
                         System.out.println(home);
                         pb.directory(home);
                         continue;
                     }
-
-                    else if (dir.startsWith("~")){
-                        File newDir = new File(System.getProperty("user.home")+File.separator+dir.replace("~/", ""));
-                        pb.directory(newDir);
-                        startDir = new File(dir);
-                    }
-
-                    else if (dir.equals("..")){
+                    else if (commandLine.matches("cd ..")){
                         File parentDir = new File(pb.directory().getParent());
                         System.out.println(parentDir);
                         pb.directory(parentDir);
                         continue;
                     }
-
-                    else if (dir.equals(".")){
-                        System.out.println(startDir);
-                        pb.directory(startDir);
-                        continue;
-                    }
-                    else if (dir.startsWith("/")){
-                        pb.directory(new File(dir));
-                        startDir = new File(dir);
-                    }
-                    else if (dir.startsWith("./")){
-                        if(dir.equals("./"))
-                            continue;
-                        else{
-                            File newDir = new File(pb.directory() + File.separator + dir);
-                            pb.directory(newDir);
-                            startDir = new File(dir);
-                        }
-                    }
-
                     else{
+                        String dir = commandArr.get(1);
                         File newDir = new File(pb.directory() + File.separator + dir);
-
                         if (newDir.isDirectory()){
                             System.out.println(newDir);
                             pb.directory(newDir);
-                            startDir = new File(dir);
                             continue;
                         }
-                        else{
+                        else {
                             System.out.println(dir + ": No such file or directory");
                             continue;
                         }
-
                     }
                 }
+//                else if (commandLine.contains("cd")){
+////                    String dir = commandArr.get(1);
+//
+//                    if (commandLine.matches("cd") | commandArr.get(1).equals("~")){
+//                        File home = new File(System.getProperty("user.home"));
+//                        System.out.println(home);
+//                        pb.directory(home);
+//                        continue;
+//                    }
+//
+//                    else if (commandArr.get(1).startsWith("~")){
+//                        File newDir = new File(System.getProperty("user.home")+File.separator+commandArr.get(1).replace("~/", ""));
+//                        pb.directory(newDir);
+//                        startDir = new File(commandArr.get(1));
+//                    }
+//
+//                    else if (commandArr.get(1).equals("..")){
+//                        File parentDir = new File(pb.directory().getParent());
+//                        System.out.println(parentDir);
+//                        pb.directory(parentDir);
+//                        continue;
+//                    }
+//
+//                    else if (commandArr.get(1).equals(".")){
+//                        System.out.println(startDir);
+//                        pb.directory(startDir);
+//                        continue;
+//                    }
+//                    else if (commandArr.get(1).startsWith("/")){
+//                        pb.directory(new File(commandArr.get(1)));
+//                        startDir = new File(commandArr.get(1));
+//                    }
+//                    else if (commandArr.get(1).startsWith("./")){
+//                        if(commandArr.get(1).equals("./"))
+//                            continue;
+//                        else{
+//                            File newDir = new File(pb.directory() + File.separator + commandArr.get(1));
+//                            pb.directory(newDir);
+//                            startDir = new File(commandArr.get(1));
+//                        }
+//                    }
+//
+//                    else{
+//                        String dir = commandArr.get(1);
+//                        File newDir = new File(pb.directory() + File.separator + dir);
+//
+//                        if (newDir.isDirectory()){
+//                            System.out.println(newDir);
+//                            pb.directory(newDir);
+//                            startDir = new File(dir);
+//                            continue;
+//                        }
+//                        else{
+//                            System.out.println(dir + ": No such file or directory");
+//                            continue;
+//                        }
+//
+//                    }
+//                }
 
 
                 pb.command(commandArr);
