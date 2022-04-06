@@ -58,12 +58,6 @@ public class SimpleShell {
 
                     commandArr = Arrays.asList(lastCmd.split(" "));
                     commandLine = lastCmd;
-
-                    beforeCmd = String.join(" ", history.get(history.size()-2));
-
-                    if(!commandLine.equals(beforeCmd))
-                        history.add(commandArr);
-
                 }
             }
 
@@ -71,8 +65,8 @@ public class SimpleShell {
 //          if enter !<#> -> history recorded the # of history command
             else if(String.valueOf(commandLine.charAt(0)).matches("!")){
                 int idx = Character.getNumericValue(commandLine.charAt(1));
-                if(idx < history.size()){
-                    String idxCmd = String.join(" ", history.get(idx));
+                if(idx <= history.size()){
+                    String idxCmd = String.join(" ", history.get(idx-1));
 
                     commandArr = Arrays.asList(idxCmd.split(" "));
                     commandLine = idxCmd;
@@ -93,8 +87,8 @@ public class SimpleShell {
 //              history command
                 if(commandLine.matches("history")){
 
-                    for (int i = 0; i<history.size(); i++){
-                        System.out.println(i+" "+String.join(" ", history.get(i)));
+                    for (int i = 1; i<=history.size(); i++){
+                        System.out.println(i+" "+String.join(" ", history.get(i-1)));
                     }
                     continue;
                 }
@@ -102,24 +96,36 @@ public class SimpleShell {
 
 //                cd command
 
-                if (commandLine.contains("cd")){
+                else if (commandLine.contains("cd")){
                     if (commandLine.matches("cd") | commandLine.matches("cd ~")){
                         File home = new File(System.getProperty("user.home"));
-                        System.out.println(home);
+//                        System.out.println(home);
                         pb.directory(home);
                         continue;
                     }
                     else if (commandLine.matches("cd ..")){
                         File parentDir = new File(pb.directory().getParent());
-                        System.out.println(parentDir);
+//                        System.out.println(parentDir);
                         pb.directory(parentDir);
+                        continue;
+                    }
+                    else if (commandLine.matches("cd .")){
+                        File nowDir = new File(System.getProperty("user.dir"));
+//                        System.out.println(nowDir);
+                        pb.directory(nowDir);
+                        continue;
+
+                    }
+                    else if (commandArr.get(1).startsWith("/")){
+                        File newDir = new File(commandArr.get(1));
+                        pb.directory(newDir);
                         continue;
                     }
                     else{
                         String dir = commandArr.get(1);
                         File newDir = new File(pb.directory() + File.separator + dir);
                         if (newDir.isDirectory()){
-                            System.out.println(newDir);
+//                            System.out.println(newDir);
                             pb.directory(newDir);
                             continue;
                         }
@@ -129,6 +135,9 @@ public class SimpleShell {
                         }
                     }
                 }
+
+//            OSProcess Add
+//            can run 'pwd, ls, ps, cat'
 
                 pb.command(commandArr);
 
@@ -150,10 +159,6 @@ public class SimpleShell {
                 System.out.println(commandLine+ ": not found");
                 continue;
             }
-
-
-//            OSProcess Add
-//            can run 'pwd, ls, ps, cat'
 
 
 
